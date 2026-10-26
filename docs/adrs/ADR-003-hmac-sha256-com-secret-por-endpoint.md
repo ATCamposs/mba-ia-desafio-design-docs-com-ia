@@ -1,9 +1,12 @@
 # ADR-003: Autenticação das entregas com HMAC-SHA256 e secret por endpoint
 
-- **Status:** Aceita (decidida na reunião técnica; ver `TRANSCRICAO.md` [09:22] Sofia)
 - **Data do registro:** 2026-10-26
 - **Decisores:** Sofia (Eng. de Segurança), Diego, Larissa, Bruno
 - **Documentos relacionados:** [RFC](../RFC.md), [FDD](../FDD.md) (seções "Contratos públicos" e "Matriz de erros"), [ADR-004](ADR-004-entrega-at-least-once-com-x-event-id.md)
+
+## Status
+
+Aceita (decidida na reunião técnica; ver `TRANSCRICAO.md` [09:22] Sofia)
 
 ## Contexto
 
@@ -31,10 +34,10 @@ Estes pontos decorrem da decisão acima mas **não foram fixados na reunião**. 
 
 | Alternativa | Por que foi descartada |
 |---|---|
-| **Secret global da plataforma** | "Se vaza uma, vaza tudo" ([09:21] Sofia). Com secret por endpoint, o vazamento de um cliente não compromete os outros. |
-| **Secret sem rotação** (plausível) | Cliente que vaza a secret ficaria exposto sem caminho de troca; a reunião exigiu rotação com período de convivência ([09:21] Sofia). |
-| **Rotação com corte imediato da secret antiga** (plausível) | Obrigaria o cliente a trocar a secret e o código no mesmo instante; o grace period de 24 h dá tempo de migrar os sistemas dele ([09:21] Sofia). |
-| **Apenas TLS, sem assinatura** (plausível) | TLS protege o canal, mas não prova ao cliente que a origem é a plataforma na camada de aplicação, que é o requisito de Sofia ([09:19] Sofia). TLS fica como requisito adicional, não substituto. |
+| ADR-003-ALT-01 · **Secret global da plataforma** | "Se vaza uma, vaza tudo" ([09:21] Sofia). Com secret por endpoint, o vazamento de um cliente não compromete os outros. |
+| ADR-003-ALT-02 · **Secret sem rotação** (plausível) | Cliente que vaza a secret ficaria exposto sem caminho de troca; a reunião exigiu rotação com período de convivência ([09:21] Sofia). |
+| ADR-003-ALT-03 · **Rotação com corte imediato da secret antiga** (plausível) | Obrigaria o cliente a trocar a secret e o código no mesmo instante; o grace period de 24 h dá tempo de migrar os sistemas dele ([09:21] Sofia). |
+| ADR-003-ALT-04 · **Apenas TLS, sem assinatura** (plausível) | TLS protege o canal, mas não prova ao cliente que a origem é a plataforma na camada de aplicação, que é o requisito de Sofia ([09:19] Sofia). TLS fica como requisito adicional, não substituto. |
 
 ## Consequências
 

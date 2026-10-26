@@ -1,9 +1,12 @@
 # ADR-001: Padrão Outbox no MySQL existente
 
-- **Status:** Aceita (decidida na reunião técnica; ver `TRANSCRICAO.md` [09:08] Larissa)
 - **Data do registro:** 2026-10-26
 - **Decisores:** Larissa (Tech Lead), Diego (Eng. Sênior, Plataforma), Bruno (Eng. Pleno, Pedidos)
 - **Documentos relacionados:** [RFC](../RFC.md), [FDD](../FDD.md) (seção "Fluxos detalhados"), [ADR-005](ADR-005-worker-separado-em-polling.md), [ADR-007](ADR-007-snapshot-do-payload-e-filtro-na-insercao.md)
+
+## Status
+
+Aceita (decidida na reunião técnica; ver `TRANSCRICAO.md` [09:08] Larissa)
 
 ## Contexto
 
@@ -35,9 +38,9 @@ Pontos fixados:
 
 | Alternativa | Por que foi descartada |
 |---|---|
-| **HTTP síncrono dentro de `changeStatus`** | Cliente lento trava a transação e segura locks de `orders` e `products`; cliente fora do ar forçaria escolher entre rollback da mudança de status ou perda do evento ([09:04] Bruno; "síncrono está fora de questão", [09:06] Diego). |
-| **Redis Streams ou fila equivalente** | Exige subir infraestrutura nova. Para um time pequeno, "Redis Cluster pra isso é overengineering" ([09:07] Larissa, [09:07] Diego). |
-| **Enviar HTTP depois do commit, sem tabela** (plausível, não discutida) | Se o processo cair entre o commit e o envio, o evento se perde: reintroduz o caso "status mudou e evento não saiu" que a reunião proibiu ([09:40] Bruno). |
+| ADR-001-ALT-01 · **HTTP síncrono dentro de `changeStatus`** | Cliente lento trava a transação e segura locks de `orders` e `products`; cliente fora do ar forçaria escolher entre rollback da mudança de status ou perda do evento ([09:04] Bruno; "síncrono está fora de questão", [09:06] Diego). |
+| ADR-001-ALT-02 · **Redis Streams ou fila equivalente** | Exige subir infraestrutura nova. Para um time pequeno, "Redis Cluster pra isso é overengineering" ([09:07] Larissa, [09:07] Diego). |
+| ADR-001-ALT-03 · **Enviar HTTP depois do commit, sem tabela** (plausível, não discutida) | Se o processo cair entre o commit e o envio, o evento se perde: reintroduz o caso "status mudou e evento não saiu" que a reunião proibiu ([09:40] Bruno). |
 
 ## Consequências
 

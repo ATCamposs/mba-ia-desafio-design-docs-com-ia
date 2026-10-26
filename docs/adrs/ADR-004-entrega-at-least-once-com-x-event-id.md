@@ -1,9 +1,12 @@
 # ADR-004: Garantia de entrega at-least-once com `X-Event-Id`
 
-- **Status:** Aceita (decidida na reunião técnica; ver `TRANSCRICAO.md` [09:26] Larissa)
 - **Data do registro:** 2026-10-26
 - **Decisores:** Diego, Larissa, Sofia (levantou a transferência de responsabilidade), Marcos (assumiu a documentação para clientes)
 - **Documentos relacionados:** [RFC](../RFC.md), [FDD](../FDD.md) (seções "Contratos públicos" e "Estratégias de resiliência"), [ADR-002](ADR-002-retry-com-backoff-e-dlq.md), [ADR-003](ADR-003-hmac-sha256-com-secret-por-endpoint.md)
+
+## Status
+
+Aceita (decidida na reunião técnica; ver `TRANSCRICAO.md` [09:26] Larissa)
 
 ## Contexto
 
@@ -22,9 +25,9 @@ Com retry (ADR-002) e worker que pode cair entre a chamada HTTP e a marcação d
 
 | Alternativa | Por que foi descartada |
 |---|---|
-| **Exactly-once** | "Exigiria coordenação dos dois lados e fica muito mais complexo" ([09:25] Diego). |
-| **At-most-once** (sem retry, plausível) | Perderia notificações sempre que o cliente estivesse indisponível, o oposto do objetivo da feature ([09:00] Marcos) e da política de retry ([09:17] Larissa). |
-| **Deduplicar no lado da plataforma** (plausível) | A plataforma não sabe se o cliente processou uma entrega cuja resposta se perdeu; só o cliente consegue decidir. Por isso o `event_id` vai ao cliente. |
+| ADR-004-ALT-01 · **Exactly-once** | "Exigiria coordenação dos dois lados e fica muito mais complexo" ([09:25] Diego). |
+| ADR-004-ALT-02 · **At-most-once** (sem retry, plausível) | Perderia notificações sempre que o cliente estivesse indisponível, o oposto do objetivo da feature ([09:00] Marcos) e da política de retry ([09:17] Larissa). |
+| ADR-004-ALT-03 · **Deduplicar no lado da plataforma** (plausível) | A plataforma não sabe se o cliente processou uma entrega cuja resposta se perdeu; só o cliente consegue decidir. Por isso o `event_id` vai ao cliente. |
 
 ## Consequências
 

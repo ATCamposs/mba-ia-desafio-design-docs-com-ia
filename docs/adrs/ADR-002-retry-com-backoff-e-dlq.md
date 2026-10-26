@@ -1,9 +1,12 @@
 # ADR-002: Política de retry com backoff exponencial e DLQ em tabela separada
 
-- **Status:** Aceita (decidida na reunião técnica; ver `TRANSCRICAO.md` [09:17] Larissa, [09:19] Larissa)
 - **Data do registro:** 2026-10-26
 - **Decisores:** Larissa, Diego, Bruno, Marcos (aceitou a janela), Sofia (exigiu role ADMIN e auditoria no replay)
 - **Documentos relacionados:** [RFC](../RFC.md), [FDD](../FDD.md) (seções "Fluxos detalhados" e "Estratégias de resiliência"), [ADR-001](ADR-001-outbox-no-mysql.md), [ADR-004](ADR-004-entrega-at-least-once-com-x-event-id.md)
+
+## Status
+
+Aceita (decidida na reunião técnica; ver `TRANSCRICAO.md` [09:17] Larissa, [09:19] Larissa)
 
 ## Contexto
 
@@ -29,10 +32,10 @@ Reforço: ao rejeitar 3 tentativas, Diego diz que "retentaria três vezes em 30 
 
 | Alternativa | Por que foi descartada |
 |---|---|
-| **Retry indefinido com backoff** | O evento fica pendurado para sempre se o cliente sumiu ([09:15] Diego). |
-| **3 tentativas** ("mais agressivo", [09:16] Bruno) | Janela curta demais: uma indisponibilidade de manhã esgotaria as tentativas em ~30 minutos, e já houve cliente com 2 h de manutenção ([09:16] Diego). |
-| **Marcar como `FAILED` na própria outbox, sem tabela de DLQ** | Foi a pergunta de Larissa ([09:17]); Diego preferiu tabela separada por deixar a leitura da outbox principal mais limpa e preservar evidência ([09:18] Diego). |
-| **Reprocesso automático da DLQ** (plausível, não discutida) | Reintroduziria o loop de retry sem fim que o teto de tentativas quer evitar; a reunião escolheu replay manual ([09:18] Diego). |
+| ADR-002-ALT-01 · **Retry indefinido com backoff** | O evento fica pendurado para sempre se o cliente sumiu ([09:15] Diego). |
+| ADR-002-ALT-02 · **3 tentativas** ("mais agressivo", [09:16] Bruno) | Janela curta demais: uma indisponibilidade de manhã esgotaria as tentativas em ~30 minutos, e já houve cliente com 2 h de manutenção ([09:16] Diego). |
+| ADR-002-ALT-03 · **Marcar como `FAILED` na própria outbox, sem tabela de DLQ** | Foi a pergunta de Larissa ([09:17]); Diego preferiu tabela separada por deixar a leitura da outbox principal mais limpa e preservar evidência ([09:18] Diego). |
+| ADR-002-ALT-04 · **Reprocesso automático da DLQ** (plausível, não discutida) | Reintroduziria o loop de retry sem fim que o teto de tentativas quer evitar; a reunião escolheu replay manual ([09:18] Diego). |
 
 ## Consequências
 

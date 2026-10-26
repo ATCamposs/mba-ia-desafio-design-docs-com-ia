@@ -1,9 +1,12 @@
 # ADR-005: Worker em processo separado com polling de 2 segundos
 
-- **Status:** Aceita (decidida na reunião técnica; ver `TRANSCRICAO.md` [09:10] Larissa)
 - **Data do registro:** 2026-10-26
 - **Decisores:** Diego, Larissa, Bruno, Marcos (aceitou a latência)
 - **Documentos relacionados:** [RFC](../RFC.md), [FDD](../FDD.md) (seção "Fluxos detalhados"), [ADR-001](ADR-001-outbox-no-mysql.md), [ADR-002](ADR-002-retry-com-backoff-e-dlq.md)
+
+## Status
+
+Aceita (decidida na reunião técnica; ver `TRANSCRICAO.md` [09:10] Larissa)
 
 ## Contexto
 
@@ -25,10 +28,10 @@ O requisito de latência dos clientes é "qualquer coisa abaixo de 10 segundos" 
 
 | Alternativa | Por que foi descartada |
 |---|---|
-| **Trigger ou notificação do banco** (equivalente ao `LISTEN/NOTIFY` do Postgres) | MySQL não tem listener nativo; trigger só executa SQL e não avisa processo externo. Avisar o worker exigiria improviso (escrever em arquivo ou chamar endpoint), "fica esquisito" ([09:09] Diego). |
-| **Worker dentro do processo da API** | Reiniciar a API derrubaria o worker ([09:11] Diego). |
-| **Consumidor de Redis Streams** | Já descartado na ADR-001 pelo custo de infraestrutura ([09:07] Larissa, Diego). |
-| **Intervalo de polling menor que 2 s** (plausível) | Mais carga no MySQL sem ganho para o requisito de 10 s; Marcos aceitou 2 s ([09:10] Marcos). |
+| ADR-005-ALT-01 · **Trigger ou notificação do banco** (equivalente ao `LISTEN/NOTIFY` do Postgres) | MySQL não tem listener nativo; trigger só executa SQL e não avisa processo externo. Avisar o worker exigiria improviso (escrever em arquivo ou chamar endpoint), "fica esquisito" ([09:09] Diego). |
+| ADR-005-ALT-02 · **Worker dentro do processo da API** | Reiniciar a API derrubaria o worker ([09:11] Diego). |
+| ADR-005-ALT-03 · **Consumidor de Redis Streams** | Já descartado na ADR-001 pelo custo de infraestrutura ([09:07] Larissa, Diego). |
+| ADR-005-ALT-04 · **Intervalo de polling menor que 2 s** (plausível) | Mais carga no MySQL sem ganho para o requisito de 10 s; Marcos aceitou 2 s ([09:10] Marcos). |
 
 ## Consequências
 

@@ -1,9 +1,12 @@
 # ADR-006: Reuso máximo dos padrões existentes do projeto
 
-- **Status:** Aceita (decidida na reunião técnica; ver `TRANSCRICAO.md` [09:30] Larissa)
 - **Data do registro:** 2026-10-26
 - **Decisores:** Larissa, Bruno, Diego
 - **Documentos relacionados:** [RFC](../RFC.md), [FDD](../FDD.md) (seção "Integração com o sistema existente"), [ADR-005](ADR-005-worker-separado-em-polling.md), [ADR-007](ADR-007-snapshot-do-payload-e-filtro-na-insercao.md)
+
+## Status
+
+Aceita (decidida na reunião técnica; ver `TRANSCRICAO.md` [09:30] Larissa)
 
 ## Contexto
 
@@ -15,7 +18,7 @@ A feature de webhooks é nova e tem um segundo processo (worker), o que cria a t
 
 Reuso máximo do que existe ([09:30] Larissa). Em concreto:
 
-1. **Módulo `src/modules/webhooks`** com `webhook.controller.ts`, `webhook.service.ts`, `webhook.repository.ts`, `webhook.routes.ts` e `webhook.schemas.ts`, igual aos outros módulos ([09:27] Bruno). O processamento do worker fica em arquivo dentro do módulo ([09:28] Bruno).
+1. **Módulo `src/modules/webhooks` (novo)** com `webhook.controller.ts`, `webhook.service.ts`, `webhook.repository.ts`, `webhook.routes.ts` e `webhook.schemas.ts`, igual aos outros módulos ([09:27] Bruno). O processamento do worker fica em arquivo dentro do módulo ([09:28] Bruno).
 2. **Erros**: `AppError` e subclasses, com **prefixo `WEBHOOK_`** em todos os códigos do módulo, como `WEBHOOK_NOT_FOUND`, `WEBHOOK_INVALID_URL`, `WEBHOOK_SECRET_REQUIRED` ([09:28] Bruno, [09:29] Larissa).
 3. **Logger**: Pino existente (`src/shared/logger/index.ts`); nenhuma biblioteca de log nova ([09:29] Bruno).
 4. **Middleware de erro**: o `errorMiddleware` atual já trata `AppError`, Zod e Prisma e captura os novos erros sem alteração ([09:29] Bruno).
@@ -29,9 +32,9 @@ Reuso máximo do que existe ([09:30] Larissa). Em concreto:
 
 | Alternativa | Por que foi descartada |
 |---|---|
-| **Serviço/microsserviço separado de webhooks, com código próprio** (plausível) | Seria mais uma base de código e de deploy para um time pequeno; a decisão da reunião foi "módulo igual aos outros" ([09:30] Larissa). |
-| **Biblioteca de terceiros de fila/webhooks** (plausível) | A reunião descartou infraestrutura nova ([09:07] Diego) e pediu "não vamos botar nada novo" no logging ([09:29] Bruno). |
-| **Códigos de erro livres, sem prefixo** | Quebraria a convenção de código por domínio (`INSUFFICIENT_STOCK`, `INVALID_STATUS_TRANSITION`) e dificultaria filtrar erros do módulo em logs e no cliente ([09:29] Larissa). |
+| ADR-006-ALT-01 · **Serviço/microsserviço separado de webhooks, com código próprio** (plausível) | Seria mais uma base de código e de deploy para um time pequeno; a decisão da reunião foi "módulo igual aos outros" ([09:30] Larissa). |
+| ADR-006-ALT-02 · **Biblioteca de terceiros de fila/webhooks** (plausível) | A reunião descartou infraestrutura nova ([09:07] Diego) e pediu "não vamos botar nada novo" no logging ([09:29] Bruno). |
+| ADR-006-ALT-03 · **Códigos de erro livres, sem prefixo** | Quebraria a convenção de código por domínio (`INSUFFICIENT_STOCK`, `INVALID_STATUS_TRANSITION`) e dificultaria filtrar erros do módulo em logs e no cliente ([09:29] Larissa). |
 
 ## Consequências
 

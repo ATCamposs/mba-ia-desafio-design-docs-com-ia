@@ -1,9 +1,12 @@
 # ADR-007: Payload em snapshot e filtro de eventos na inserção da outbox
 
-- **Status:** Aceita (decidida na reunião técnica; ver `TRANSCRICAO.md` [09:52] Bruno e [09:34] Diego)
 - **Data do registro:** 2026-10-26
 - **Decisores:** Larissa, Diego, Bruno
 - **Documentos relacionados:** [RFC](../RFC.md), [FDD](../FDD.md) (seções "Fluxos detalhados" e "Integração com o sistema existente"), [ADR-001](ADR-001-outbox-no-mysql.md), [ADR-006](ADR-006-reuso-dos-padroes-do-projeto.md)
+
+## Status
+
+Aceita (decidida na reunião técnica; ver `TRANSCRICAO.md` [09:52] Bruno e [09:34] Diego)
 
 ## Contexto
 
@@ -22,10 +25,10 @@ Há ainda a forma de ligar `OrderService.changeStatus` ao módulo de webhooks se
 
 | Alternativa | Por que foi descartada |
 |---|---|
-| **Guardar só `order_id` e renderizar no envio** | Se o pedido mudar depois, o evento refletiria um estado posterior ao da mudança; "tem caso esquisito" ([09:52] Larissa). |
-| **Filtrar na hora de enviar** | Insere linhas que nunca serão enviadas; foi a pergunta de Diego ([09:34]) e Bruno optou pela inserção para economizar linhas. |
-| **Injetar o repository do webhook no `OrderService`** | Acoplamento maior; "função pura recebendo o tx" basta ([09:41] Diego). |
-| **Incluir `items` no payload** | Infla o evento; o cliente já tem `GET /orders/:id` ([09:43] Diego). |
+| ADR-007-ALT-01 · **Guardar só `order_id` e renderizar no envio** | Se o pedido mudar depois, o evento refletiria um estado posterior ao da mudança; "tem caso esquisito" ([09:52] Larissa). |
+| ADR-007-ALT-02 · **Filtrar na hora de enviar** | Insere linhas que nunca serão enviadas; foi a pergunta de Diego ([09:34]) e Bruno optou pela inserção para economizar linhas. |
+| ADR-007-ALT-03 · **Injetar o repository do webhook no `OrderService`** | Acoplamento maior; "função pura recebendo o tx" basta ([09:41] Diego). |
+| ADR-007-ALT-04 · **Incluir `items` no payload** | Infla o evento; o cliente já tem `GET /orders/:id` ([09:43] Diego). |
 
 ## Consequências
 
