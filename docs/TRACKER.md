@@ -5,7 +5,7 @@ Mapeia cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [AD
 - **Fonte `TRANSCRICAO`**: Localização é `[hh:mm] Falante` de `TRANSCRICAO.md`. Mais de uma referência aparece separada por `;`.
 - **Fonte `CODIGO`**: Localização é o caminho de arquivo do repositório base.
 - Itens com "(derivado)" são derivações de desenho do FDD: a coluna Localização aponta a fala da reunião que os motiva, não uma decisão literal.
-- Os IDs `PRD-*`, `RFC-ALT/OPEN-*`, `FDD-*` e `ADR-00N` aparecem nos próprios documentos, junto ao item. Linhas `*-CODE-*`, `RFC-IMPACT-01` e `RFC-PRAZO-01` registram restrições do código ou da reunião que os documentos citam em texto corrido, sem ID.
+- Os IDs `PRD-*`, `RFC-ALT/OPEN-*`, `FDD-*`, `ADR-00N` e `ADR-00N-ALT-NN` aparecem nos próprios documentos, junto ao item. Linhas `*-CODE-*`, `RFC-IMPACT-01` e `RFC-PRAZO-01` registram restrições do código ou da reunião que os documentos citam em texto corrido, sem ID.
 
 | ID | Documento | Tipo | Conteúdo (resumo) | Fonte | Localização |
 |---|---|---|---|---|---|
@@ -189,5 +189,43 @@ Mapeia cada item registrado em [PRD](PRD.md), [RFC](RFC.md), [FDD](FDD.md) e [AD
 | ADR-001-CODE | docs/adrs/ADR-001-outbox-no-mysql.md | Restrição | Transação de changeStatus (order, histórico, estoque) onde a outbox entra | CODIGO | src/modules/orders/order.service.ts |
 | RFC-IMPACT-01 | docs/RFC.md | Impacto | Alteração crítica em código existente é no changeStatus; o resto é módulo novo, registro em app/rotas, env, logger e script | TRANSCRICAO | [09:40] Bruno; [09:30] Larissa |
 | RFC-PRAZO-01 | docs/RFC.md | Restrição | Prazo de três sprints incluindo 2 dias úteis de revisão de segurança | TRANSCRICAO | [09:46] Larissa; [09:46] Sofia |
+| ADR-001-ALT-01 | docs/adrs/ADR-001-outbox-no-mysql.md | Alternativa descartada | HTTP síncrono em changeStatus descartado | TRANSCRICAO | [09:04] Bruno; [09:06] Diego |
+| ADR-001-ALT-02 | docs/adrs/ADR-001-outbox-no-mysql.md | Alternativa descartada | Redis Streams ou fila equivalente descartado | TRANSCRICAO | [09:07] Larissa; [09:07] Diego |
+| ADR-001-ALT-03 | docs/adrs/ADR-001-outbox-no-mysql.md | Alternativa descartada | Enviar HTTP depois do commit, sem tabela (plausível, derivado) | TRANSCRICAO | [09:40] Bruno |
+| ADR-002-ALT-01 | docs/adrs/ADR-002-retry-com-backoff-e-dlq.md | Alternativa descartada | Retry indefinido descartado | TRANSCRICAO | [09:15] Diego |
+| ADR-002-ALT-02 | docs/adrs/ADR-002-retry-com-backoff-e-dlq.md | Alternativa descartada | 3 tentativas descartadas | TRANSCRICAO | [09:16] Bruno; [09:16] Diego |
+| ADR-002-ALT-03 | docs/adrs/ADR-002-retry-com-backoff-e-dlq.md | Alternativa descartada | FAILED na própria outbox em vez de DLQ separada | TRANSCRICAO | [09:17] Larissa; [09:18] Diego |
+| ADR-002-ALT-04 | docs/adrs/ADR-002-retry-com-backoff-e-dlq.md | Alternativa descartada | Reprocesso automático da DLQ (plausível, derivado) | TRANSCRICAO | [09:18] Diego |
+| ADR-003-ALT-01 | docs/adrs/ADR-003-hmac-sha256-com-secret-por-endpoint.md | Alternativa descartada | Secret global descartada | TRANSCRICAO | [09:21] Sofia |
+| ADR-003-ALT-02 | docs/adrs/ADR-003-hmac-sha256-com-secret-por-endpoint.md | Alternativa descartada | Secret sem rotação (plausível, derivado) | TRANSCRICAO | [09:21] Sofia |
+| ADR-003-ALT-03 | docs/adrs/ADR-003-hmac-sha256-com-secret-por-endpoint.md | Alternativa descartada | Rotação com corte imediato (plausível, derivado) | TRANSCRICAO | [09:21] Sofia |
+| ADR-003-ALT-04 | docs/adrs/ADR-003-hmac-sha256-com-secret-por-endpoint.md | Alternativa descartada | Apenas TLS sem assinatura (plausível, derivado) | TRANSCRICAO | [09:19] Sofia |
+| ADR-004-ALT-01 | docs/adrs/ADR-004-entrega-at-least-once-com-x-event-id.md | Alternativa descartada | Exactly-once descartado | TRANSCRICAO | [09:25] Diego |
+| ADR-004-ALT-02 | docs/adrs/ADR-004-entrega-at-least-once-com-x-event-id.md | Alternativa descartada | At-most-once sem retry (plausível, derivado) | TRANSCRICAO | [09:17] Larissa |
+| ADR-004-ALT-03 | docs/adrs/ADR-004-entrega-at-least-once-com-x-event-id.md | Alternativa descartada | Deduplicação no lado da plataforma (plausível, derivado) | TRANSCRICAO | [09:25] Diego |
+| ADR-005-ALT-01 | docs/adrs/ADR-005-worker-separado-em-polling.md | Alternativa descartada | Trigger ou notificação do banco descartada | TRANSCRICAO | [09:09] Diego |
+| ADR-005-ALT-02 | docs/adrs/ADR-005-worker-separado-em-polling.md | Alternativa descartada | Worker dentro do processo da API descartado | TRANSCRICAO | [09:11] Diego |
+| ADR-005-ALT-03 | docs/adrs/ADR-005-worker-separado-em-polling.md | Alternativa descartada | Consumidor de Redis Streams descartado | TRANSCRICAO | [09:07] Larissa |
+| ADR-005-ALT-04 | docs/adrs/ADR-005-worker-separado-em-polling.md | Alternativa descartada | Polling com intervalo menor que 2 s (plausível, derivado) | TRANSCRICAO | [09:10] Marcos |
+| ADR-006-ALT-01 | docs/adrs/ADR-006-reuso-dos-padroes-do-projeto.md | Alternativa descartada | Microsserviço separado de webhooks (plausível, derivado) | TRANSCRICAO | [09:30] Larissa |
+| ADR-006-ALT-02 | docs/adrs/ADR-006-reuso-dos-padroes-do-projeto.md | Alternativa descartada | Biblioteca de terceiros de fila/webhooks (plausível, derivado) | TRANSCRICAO | [09:29] Bruno; [09:07] Diego |
+| ADR-006-ALT-03 | docs/adrs/ADR-006-reuso-dos-padroes-do-projeto.md | Alternativa descartada | Códigos de erro livres, sem prefixo | TRANSCRICAO | [09:29] Larissa |
+| ADR-007-ALT-01 | docs/adrs/ADR-007-snapshot-do-payload-e-filtro-na-insercao.md | Alternativa descartada | Guardar só order_id e renderizar no envio | TRANSCRICAO | [09:52] Larissa |
+| ADR-007-ALT-02 | docs/adrs/ADR-007-snapshot-do-payload-e-filtro-na-insercao.md | Alternativa descartada | Filtrar na hora de enviar | TRANSCRICAO | [09:34] Diego; [09:34] Bruno |
+| ADR-007-ALT-03 | docs/adrs/ADR-007-snapshot-do-payload-e-filtro-na-insercao.md | Alternativa descartada | Injetar o repository do webhook no OrderService | TRANSCRICAO | [09:41] Diego |
+| ADR-007-ALT-04 | docs/adrs/ADR-007-snapshot-do-payload-e-filtro-na-insercao.md | Alternativa descartada | Incluir items no payload | TRANSCRICAO | [09:43] Diego |
+| PRD-PER-01 | docs/PRD.md | Persona | Sistema do cliente B2B recebe o POST do evento | TRANSCRICAO | [09:00] Marcos |
+| PRD-PER-02 | docs/PRD.md | Persona | Usuário que representa o cliente gerencia webhooks pelo JWT | TRANSCRICAO | [09:32] Marcos |
+| PRD-PER-03 | docs/PRD.md | Persona | Administrador reprocessa a DLQ | TRANSCRICAO | [09:36] Sofia |
+| PRD-PER-04 | docs/PRD.md | Persona | Marcos documenta a integração no portal | TRANSCRICAO | [09:40] Marcos |
+| PRD-CEN-01 | docs/PRD.md | Cenário de uso | Cenário: só quero saber quando vira SHIPPED e DELIVERED | TRANSCRICAO | [09:33] Marcos |
+| PRD-CEN-02 | docs/PRD.md | Cenário de uso | Cenário: endpoint do cliente cai 2 h em manutenção e os eventos chegam depois | TRANSCRICAO | [09:16] Diego |
+| PRD-CEN-03 | docs/PRD.md | Cenário de uso | Cenário: cliente consulta os últimos 100 webhooks enviados | TRANSCRICAO | [09:34] Marcos |
+| PRD-CEN-04 | docs/PRD.md | Cenário de uso | Cenário: cliente vaza a secret e a troca sem indisponibilidade | TRANSCRICAO | [09:21] Sofia; [09:22] Diego |
+| PRD-DEP-01 | docs/PRD.md | Dependência | Dependência: registrar o evento na mesma transação da mudança de status | TRANSCRICAO | [09:40] Bruno |
+| PRD-DEP-02 | docs/PRD.md | Dependência | Dependência: MySQL atual e um processo adicional para o worker | TRANSCRICAO | [09:07] Diego; [09:11] Diego |
+| PRD-DEP-03 | docs/PRD.md | Dependência | Dependência: revisão de segurança de Sofia antes do deploy | TRANSCRICAO | [09:46] Sofia; [09:49] Sofia |
+| PRD-DEP-04 | docs/PRD.md | Dependência | Dependência: documentação para clientes no portal | TRANSCRICAO | [09:26] Marcos; [09:40] Marcos |
+| PRD-DEP-05 | docs/PRD.md | Dependência | Dependência: prazo de três sprints com a revisão de segurança | TRANSCRICAO | [09:46] Larissa; [09:47] Larissa |
 
-**Totais:** 180 linhas; 154 com Fonte = TRANSCRICAO (85%); 26 com Fonte = CODIGO. Linhas que carregam alguma derivação de desenho ("derivado"): 41; nelas a Localização aponta a fala que motiva o item, não uma decisão literal.
+**Totais:** 218 linhas; 192 com Fonte = TRANSCRICAO (88%); 26 com Fonte = CODIGO. Linhas que carregam alguma derivação de desenho ("derivado"): 51; nelas a Localização aponta a fala que motiva o item, não uma decisão literal.
