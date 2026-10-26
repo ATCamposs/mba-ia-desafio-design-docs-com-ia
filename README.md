@@ -13,7 +13,7 @@ O ponto central do exercício é separar o que **entra** do que **não entra**: 
 | Ferramenta | Papel |
 |---|---|
 | **Claude Code** (app desktop do Claude, modelo Claude Sonnet 5.5) | Ferramenta principal: leu a transcrição e o código, escreveu os ADRs, o RFC, o FDD, o PRD, o Tracker e este README, e rodou as validações. |
-| **Subagente `claim-verifier`** (Claude Code, 3 execuções) | Verificação independente e somente leitura: 17 afirmações sobre o código e cada linha do Tracker contra a transcrição (as 90 primeiras e as 90 últimas, em duas execuções). |
+| **Subagente `claim-verifier`** (Claude Code, 3 execuções) | Verificação independente e somente leitura: 17 afirmações sobre o código e cada linha do Tracker contra a transcrição (as 90 primeiras e as 87 restantes, em duas execuções). |
 | **Subagente `adversarial-critic`** (Claude Code) | Crítica adversarial do pacote inteiro, com lentes de contradição, invenção, redundância e furos de implementação. |
 | **Script de validação** (Python, local, não versionado) | Checagem mecânica: timestamps e falantes do Tracker existem na transcrição, caminhos de arquivo existem, IDs citados nos documentos têm linha no Tracker, ADRs têm as seções obrigatórias. |
 
@@ -69,11 +69,11 @@ Priorize por severidade. Máximo 15 achados, só os que importam.
 
 ## Iterações e ajustes
 
-Depois do primeiro rascunho completo foram **três ciclos principais** de revisão e correção.
+Depois do primeiro rascunho completo foram **quatro ciclos principais** de revisão e correção.
 
 **Erros que eu mesmo detectei ao escrever**
 
-- **"5 tentativas" não fechava com a conta.** A transcrição diz "total 5 tentativas" e lista cinco intervalos (1 min, 5 min, 30 min, 2 h, 12 h) somando 14 h 36 min, os "quase 15 horas" de Diego. Isso só fecha como 1 envio inicial mais 5 retentativas (6 requisições). Registrei como questão em aberto (RFC-OPEN-06) e, na revisão adversarial, achei a fala que sustenta essa leitura ([09:16] Diego: com 3 tentativas "retentaria três vezes em 30 minutos"), que passei a citar.
+- **"5 tentativas" não fechava com a conta.** A transcrição diz "total 5 tentativas" e lista cinco intervalos (1 min, 5 min, 30 min, 2 h, 12 h) somando 14 h 36 min, os "quase 15 horas" de Diego. Isso só fecha como 1 envio inicial mais 5 retentativas (6 requisições). Registrei como questão em aberto (RFC-OPEN-06) e a revisão adversarial apontou a fala que sustenta essa leitura ([09:16] Diego: com 3 tentativas "retentaria três vezes em 30 minutos"), que passei a citar.
 - **O código não deixava `WEBHOOK_NOT_FOUND` do jeito que a reunião descreveu.** `NotFoundError` fixa o código `NOT_FOUND` e não aceita um customizado, então o erro precisa estender `AppError` direto. Além disso, `validate.middleware.ts` converte todo `ZodError` em `VALIDATION_ERROR`, então `http://` no cadastro sai como `VALIDATION_ERROR`, e `WEBHOOK_INVALID_URL` ficou como revalidação defensiva. Ajustei FDD e ADR-006.
 - **Invenção no PRD.** Um primeiro rascunho do PRD falava em "cliente piloto", que ninguém citou. Removi antes da verificação.
 
@@ -89,6 +89,13 @@ Depois do primeiro rascunho completo foram **três ciclos principais** de revis�
 - Sete derivações do FDD estavam sem "(derivado)" no Tracker; foram marcadas.
 
 **Ciclo 3: revalidação mecânica.** Rodei de novo o script de validação depois de cada rodada: todos os `[hh:mm] Falante` existem na transcrição, os caminhos de código citados no Tracker existem, todo ID citado nos documentos tem linha no Tracker. Os únicos caminhos "inexistentes" que os documentos mencionam são arquivos novos a criar (`src/worker.ts` e arquivos do módulo `webhooks`), sempre marcados como novos.
+
+**Ciclo 4: releitura contra o enunciado.** Reli o README e cada documento contra os requisitos e os critérios de aceite, item por item. Achei e corrigi:
+
+- ADRs sem uma seção própria `## Status` (estava como linha de metadados) e RFC sem o título `Metadados`: criei os títulos exigidos.
+- No FDD, só o `POST /webhooks` tinha requisição e resposta de exemplo completas; os demais endpoints ganharam bloco de requisição e de resposta explícitos.
+- Cobertura do Tracker: alternativas dos ADRs, personas, cenários e dependências do PRD não tinham linha. Passaram a ter ID no documento e linha no Tracker (de 180 para 218 linhas, 88% com fonte na transcrição).
+- Mencionava `src/modules/webhooks` e o script do worker sem marcar como "novo"; marquei.
 
 Não resolvido de propósito: as questões RFC-OPEN-06 a 10 dependem de Diego, Larissa e Sofia e estão abertas no RFC.
 
@@ -107,6 +114,6 @@ Ordem sugerida de leitura (do mais alto nível ao mais detalhado):
    - [ADR-006: Reuso dos padrões do projeto](docs/adrs/ADR-006-reuso-dos-padroes-do-projeto.md)
    - [ADR-007: Snapshot do payload e filtro na inserção](docs/adrs/ADR-007-snapshot-do-payload-e-filtro-na-insercao.md)
 4. [`docs/FDD.md`](docs/FDD.md): como construir, com a seção "Integração com o sistema existente".
-5. [`docs/TRACKER.md`](docs/TRACKER.md): de onde veio cada item (transcrição ou código).
+5. [`docs/TRACKER.md`](docs/TRACKER.md): de onde veio cada item (transcrição ou código), 218 linhas.
 
 `TRANSCRICAO.md` não foi alterado.
