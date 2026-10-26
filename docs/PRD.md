@@ -25,12 +25,12 @@ O OMS passa a **notificar clientes B2B por webhook** sempre que o status de um p
 
 | Persona | Quem é | Cenário |
 |---|---|---|
-| **Sistema do cliente B2B** (Atlas, MaxDistribuição, Nova Cargo) | Integrações que consomem a API | Recebe um POST quando o pedido passa para um status que ele escolheu; confere a assinatura e deduplica por `X-Event-Id`. |
-| **Usuário que representa o cliente** | Usuário autenticado no OMS por JWT ([09:32] Marcos) | Cadastra, edita, remove e lista webhooks; rotaciona a secret; consulta o histórico de entregas. |
-| **Administrador da plataforma** (role ADMIN) | Operação interna | Reprocessa eventos que foram para a DLQ ([09:36] Sofia). |
-| **Marcos / time de produto** | PM | Documenta a integração no portal de desenvolvedor ([09:40] Marcos). |
+| PRD-PER-01 · **Sistema do cliente B2B** (Atlas, MaxDistribuição, Nova Cargo) | Integrações que consomem a API | Recebe um POST quando o pedido passa para um status que ele escolheu; confere a assinatura e deduplica por `X-Event-Id`. |
+| PRD-PER-02 · **Usuário que representa o cliente** | Usuário autenticado no OMS por JWT ([09:32] Marcos) | Cadastra, edita, remove e lista webhooks; rotaciona a secret; consulta o histórico de entregas. |
+| PRD-PER-03 · **Administrador da plataforma** (role ADMIN) | Operação interna | Reprocessa eventos que foram para a DLQ ([09:36] Sofia). |
+| PRD-PER-04 · **Marcos / time de produto** | PM | Documenta a integração no portal de desenvolvedor ([09:40] Marcos). |
 
-Cenários principais: (1) "só quero saber quando vira SHIPPED e DELIVERED" ([09:33] Marcos); (2) o endpoint do cliente cai para manutenção de 2 h e depois volta, e os eventos chegam ([09:16] Diego); (3) o cliente quer saber "quais foram os últimos 100 webhooks que vocês mandaram pra mim" ([09:34] Marcos); (4) um cliente vaza a secret e a troca sem janela de indisponibilidade ([09:21] Sofia, [09:22] Diego).
+Cenários principais: **PRD-CEN-01** "só quero saber quando vira SHIPPED e DELIVERED" ([09:33] Marcos); **PRD-CEN-02** o endpoint do cliente cai para manutenção de 2 h e depois volta, e os eventos chegam ([09:16] Diego); **PRD-CEN-03** o cliente quer saber "quais foram os últimos 100 webhooks que vocês mandaram pra mim" ([09:34] Marcos); **PRD-CEN-04** um cliente vaza a secret e a troca sem janela de indisponibilidade ([09:21] Sofia, [09:22] Diego).
 
 ## 4. Objetivos e métricas de sucesso
 
@@ -117,11 +117,11 @@ Resumo; o raciocínio completo está nos ADRs.
 
 ## 9. Dependências
 
-- **Fluxo de pedidos**: a mudança de status do pedido precisa registrar o evento na mesma transação ([09:40] Bruno).
-- **Infraestrutura**: o MySQL atual; um processo adicional para o worker; nenhuma infra nova ([09:07] Diego, [09:11] Diego).
-- **Segurança**: revisão de Sofia (HMAC e geração de secret) antes do deploy ([09:46] Sofia, [09:49] Sofia).
-- **Comunicação com clientes**: Marcos documenta a integração e o comportamento at-least-once no portal de desenvolvedor ([09:26] Marcos, [09:40] Marcos) e atualiza os clientes ([09:49] Marcos).
-- **Prazo**: três sprints, incluindo a revisão de segurança ([09:46] Larissa, [09:47] Larissa).
+- PRD-DEP-01 · **Fluxo de pedidos**: a mudança de status do pedido precisa registrar o evento na mesma transação ([09:40] Bruno).
+- PRD-DEP-02 · **Infraestrutura**: o MySQL atual; um processo adicional para o worker; nenhuma infra nova ([09:07] Diego, [09:11] Diego).
+- PRD-DEP-03 · **Segurança**: revisão de Sofia (HMAC e geração de secret) antes do deploy ([09:46] Sofia, [09:49] Sofia).
+- PRD-DEP-04 · **Comunicação com clientes**: Marcos documenta a integração e o comportamento at-least-once no portal de desenvolvedor ([09:26] Marcos, [09:40] Marcos) e atualiza os clientes ([09:49] Marcos).
+- PRD-DEP-05 · **Prazo**: três sprints, incluindo a revisão de segurança ([09:46] Larissa, [09:47] Larissa).
 
 ## 10. Riscos e mitigação
 

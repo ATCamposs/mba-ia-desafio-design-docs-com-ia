@@ -181,7 +181,7 @@ A cada **2 s** ([09:09] Diego), um ciclo (`tick`):
    3. Monta o corpo (string exata que será assinada; endpoint sem secret utilizável → falha permanente `WEBHOOK_SECRET_REQUIRED`), os headers e as assinaturas (seção 6.8).
    4. Faz `POST` com `fetch` global do Node 20 e `AbortSignal.timeout(10_000)` ([09:42] Diego). Redirects não são seguidos (`redirect: 'manual'`). *(desenho)*
    5. Resultado **2xx** = sucesso. Qualquer outra coisa (3xx, 4xx, 5xx, timeout, erro de rede) = falha retentável. *(desenho)*
-   6. Insere uma linha em `webhook_deliveries` (resultado, status HTTP, corpo da resposta truncado em 2 KB, duração).
+   6. Insere uma linha em `webhook_deliveries` (`startedAt`, resultado, status HTTP, corpo da resposta truncado em 2 KB, duração).
    7. Sucesso → `status = DELIVERED`, `attempts += 1`, `lockedAt = null`. Falha → fluxo 5.3.
 4. Se o lote veio cheio (`WEBHOOK_BATCH_SIZE` linhas), inicia o próximo ciclo na hora, para drenar backlog; senão, dorme até completar 2 s desde o início do ciclo. Ciclos nunca se sobrepõem. *(desenho)*
 
@@ -230,7 +230,7 @@ Erros seguem o envelope existente de `src/middlewares/error.middleware.ts`: `{ "
 
 ### 6.1 `POST /api/v1/webhooks` — cadastrar webhook (FDD-CONTRATO-01)
 
-Headers: `Authorization: Bearer <jwt>`, `Content-Type: application/json`.
+**Requisição** (headers `Authorization: Bearer <jwt>` e `Content-Type: application/json`):
 
 ```json
 {
@@ -240,7 +240,7 @@ Headers: `Authorization: Bearer <jwt>`, `Content-Type: application/json`.
 }
 ```
 
-`201 Created` — a `secret` é devolvida **somente aqui** ([09:31] Marcos):
+**Resposta** `201 Created`; a `secret` é devolvida **somente aqui** ([09:31] Marcos):
 
 ```json
 {
@@ -261,7 +261,14 @@ Regras: `url` precisa ser `https` ([09:23] Sofia); `events` é lista não vazia 
 
 ### 6.2 `GET /api/v1/webhooks?customerId=<uuid>&page=1&pageSize=20` — listar webhooks de um customer (FDD-CONTRATO-02)
 
-`200 OK`, no formato paginado de `src/shared/http/response.ts` (`paginated`). **A secret não é retornada** (*desenho*: [09:22] Diego relata vazamento de secret em log de cliente).
+**Requisição** (sem corpo):
+
+```http
+GET /api/v1/webhooks?customerId=5f0c9d3e-8a54-4c63-9c1e-0b6f3d2a1e77&page=1&pageSize=20
+Authorization: Bearer <jwt>
+```
+
+**Resposta** `200 OK`, no formato paginado de `src/shared/http/response.ts` (`paginated`). **A secret não é retornada** (*desenho*: [09:22] Diego relata vazamento de secret em log de cliente).
 
 ```json
 {
@@ -284,21 +291,49 @@ Status: `200`; `400 VALIDATION_ERROR` (`customerId` ausente ou não UUID); `401`
 
 ### 6.3 `PATCH /api/v1/webhooks/:id` — editar (FDD-CONTRATO-03)
 
-Corpo parcial; campos aceitos: `url`, `events`, `active`. A secret não é editável aqui (usa-se a rotação). `active: false` **pausa** o webhook: eventos novos deixam de ser registrados (e não são recuperados ao reativar), enquanto eventos já na outbox continuam sendo entregues. Para manutenção do cliente vale o retry, não a desativação. *(desenho; "estado ativo" é de [09:21] Bruno, sem semântica na reunião)*
+**Requisição**: corpo parcial; campos aceitos: `url`, `events`, `active`. A secret não é editável aqui (usa-se a rotação). `active: false` **pausa** o webhook: eventos novos deixam de ser registrados (e não são recuperados ao reativar), enquanto eventos já na outbox continuam sendo entregues. Para manutenção do cliente vale o retry, não a desativação. *(desenho; "estado ativo" é de [09:21] Bruno, sem semântica na reunião)*
 
 ```json
 { "events": ["PAID", "SHIPPED", "DELIVERED"], "active": true }
 ```
 
-`200 OK` com o objeto da seção 6.2 (sem `secret`). Status: `200`; `400 VALIDATION_ERROR`; `401`; `404 WEBHOOK_NOT_FOUND`.
+**Resposta** `200 OK`, com o objeto atualizado (sem `secret`):
+
+```json
+{
+  "id": "a3b1c2d4-1111-4222-8333-444455556666",
+  "customerId": "5f0c9d3e-8a54-4c63-9c1e-0b6f3d2a1e77",
+  "url": "https://api.atlascomercial.example/hooks/orders",
+  "events": ["PAID", "SHIPPED", "DELIVERED"],
+  "active": true,
+  "createdAt": "2026-11-03T14:00:00.000Z",
+  "updatedAt": "2026-11-03T16:20:00.000Z"
+}
+```
+
+Status: `200`; `400 VALIDATION_ERROR`; `401`; `404 WEBHOOK_NOT_FOUND`.
 
 ### 6.4 `DELETE /api/v1/webhooks/:id` — remover (FDD-CONTRATO-04)
 
-`204 No Content`, sem corpo (mesma convenção de `DELETE /orders/:id`). Status: `204`; `401`; `404 WEBHOOK_NOT_FOUND`. Remove em cascata eventos pendentes, entregas e DLQ do webhook.
+**Requisição**:
+
+```http
+DELETE /api/v1/webhooks/a3b1c2d4-1111-4222-8333-444455556666
+Authorization: Bearer <jwt>
+```
+
+**Resposta** `204 No Content`, sem corpo (mesma convenção de `DELETE /orders/:id`). Status: `204`; `401`; `404 WEBHOOK_NOT_FOUND`. Remove em cascata eventos pendentes, entregas e DLQ do webhook.
 
 ### 6.5 `POST /api/v1/webhooks/:id/secret/rotate` — rotacionar secret (FDD-CONTRATO-05)
 
-Sem corpo. `200 OK`:
+**Requisição** (sem corpo):
+
+```http
+POST /api/v1/webhooks/a3b1c2d4-1111-4222-8333-444455556666/secret/rotate
+Authorization: Bearer <jwt>
+```
+
+**Resposta** `200 OK`:
 
 ```json
 {
@@ -314,7 +349,14 @@ Semântica: a secret anterior continua válida até `previousSecretExpiresAt` (2
 
 Devolve as **últimas 100 tentativas** do webhook, da mais recente para a mais antiga, com sucesso/falha, payload, resposta e tempo de resposta ([09:34] Marcos). Sem paginação. *(desenho: 100 por tentativa, não por evento)*
 
-`200 OK`:
+**Requisição** (sem corpo):
+
+```http
+GET /api/v1/webhooks/a3b1c2d4-1111-4222-8333-444455556666/deliveries
+Authorization: Bearer <jwt>
+```
+
+**Resposta** `200 OK`:
 
 ```json
 {
@@ -339,7 +381,16 @@ Devolve as **últimas 100 tentativas** do webhook, da mais recente para a mais a
 
 ### 6.7 `POST /api/v1/admin/webhooks/dead-letter/:id/replay` — reprocessar DLQ (FDD-CONTRATO-07)
 
-Exige role **ADMIN** ([09:36] Sofia, [09:36] Larissa): `authenticate` + `requireRole('ADMIN')`. Sem corpo. `200 OK`:
+Exige role **ADMIN** ([09:36] Sofia, [09:36] Larissa): `authenticate` + `requireRole('ADMIN')`.
+
+**Requisição** (sem corpo):
+
+```http
+POST /api/v1/admin/webhooks/dead-letter/e9f8a7b6-0000-4000-8000-0000000000aa/replay
+Authorization: Bearer <jwt de usuário ADMIN>
+```
+
+**Resposta** `200 OK`:
 
 ```json
 {
@@ -482,7 +533,7 @@ Caminhos abaixo existem no repositório base; para cada um, como o módulo de we
 | FDD-INT-12 | `src/shared/logger/index.ts` | Mesmo `logger` Pino; `redactPaths` recebe os campos de secret. |
 | FDD-INT-13 | `src/shared/http/response.ts` | `paginated()` formata a listagem `GET /webhooks`. |
 | FDD-INT-14 | `prisma/schema.prisma` | Novos models e enums da seção 4; `Customer` ganha a relação `webhooks WebhookEndpoint[]`. Uma migration aditiva em `prisma/migrations/`. |
-| FDD-INT-15 | `package.json` | Script `"worker": "tsx --env-file=.env src/worker.ts"` (espelha o `dev`) e, para produção, `node --env-file=.env dist/worker.js` (espelha o `start`). |
+| FDD-INT-15 | `package.json` | Script `"worker": "tsx --env-file=.env src/worker.ts"` (arquivo novo) (espelha o `dev`) e, para produção, `node --env-file=.env dist/worker.js` (espelha o `start`). |
 
 Estrutura nova do módulo (mesma forma de `src/modules/orders`): `webhook.controller.ts`, `webhook.service.ts`, `webhook.repository.ts`, `webhook.routes.ts`, `webhook.schemas.ts`, `webhook.publisher.ts` (`publishWebhookEvent`), `webhook.processor.ts` (ciclo do worker), `webhook.signature.ts` (HMAC) e `src/worker.ts`.
 
